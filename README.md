@@ -235,6 +235,6 @@ These development tools are not required on the production hub.
 
 [Architecture](docs/architecture.md) records callback, SQL, class and Ledokol
 contracts. [References](docs/references.md) lists primary documentation and
-pinned source links. The supplied TTHBlock file did not include a redistribution
-license; this repository does not infer one from Verlihub or Ledokol's licenses.
+pinned source links. This repository includes the GNU General Public License
+version 3 in [LICENSE](LICENSE), preserved from its existing GitHub history.
 The copied no-ai-slop material retains Peter Yang's MIT notice in its source copy.

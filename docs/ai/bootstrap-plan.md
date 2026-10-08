@@ -43,14 +43,19 @@ endpoint or send private hub data while testing.
 ## Verified on 2026-10-08
 
 `make check` passed syntax checks, all 14 offline callback tests on Lua 5.4.7,
-and validation of 13 skills, 48 local links, provider adapters, copied-source
+and validation of 13 skills, local links, provider adapters, copied-source
 hashes, JSON/TOML, and the 100-character code limit. The same checks passed
 with `LUA=.tools/lua-5.1.5/src/lua LUAC=.tools/lua-5.1.5/src/luac`.
 
 `make ai-check` passed local stdio initialization, CCE status and retrieval,
 and CTX execution, persistent indexing, and search. All four shell scripts
-passed `bash -n`. The CCE index contains 42 project files and excludes local
-runtime downloads, secrets, and the large copied writing references.
+passed `bash -n`. The CCE index excludes local runtime downloads, secrets,
+and the large copied writing references.
+
+The destination already contained initial commit
+`486ab885d9b1d201942c2e25140a5a5f4ba99513` with a GPLv3 `LICENSE` file.
+That commit and license are preserved through a merge; no remote history is
+replaced. The README records GPLv3 and the writing references' MIT notices.
 
 The local harness uses mocks. A running Verlihub/Ledokol installation, real
 SQL permissions, network binding, and hub moderation actions require live

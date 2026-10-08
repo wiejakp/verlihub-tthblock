@@ -1,0 +1,16 @@
+[features]
+hooks = true
+plugin_hooks = true
+
+[mcp_servers.context-engine]
+command = "bash"
+args = ["scripts/ai/cce.sh", "serve"]
+startup_timeout_sec = 60
+
+[mcp_servers.context-mode]
+command = "bash"
+args = ["scripts/ai/context-mode.sh"]
+startup_timeout_sec = 60
+
+[mcp_servers.context-mode.env]
+CONTEXT_MODE_PLATFORM = "codex"

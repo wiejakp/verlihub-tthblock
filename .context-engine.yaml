@@ -1,0 +1,39 @@
+# Keep this project's persistent index inside its Git root.
+storage:
+  path: .cce/storage
+compression:
+  level: standard
+  output: standard
+  ollama_url: http://127.0.0.1:11434
+indexer_redact_secrets: true
+memory_redact_pii: true
+# CCE 0.4.26 requires explicit ignore patterns in addition to .cceignore.
+indexer:
+  ignore:
+    - .git
+    - .git/**
+    - .cce
+    - .cce/**
+    - .context-mode
+    - .context-mode/**
+    - .tools
+    - .tools/**
+    - node_modules
+    - '**/node_modules/**'
+    - __pycache__
+    - '**/__pycache__/**'
+    - .claude/settings.local.json
+    - .env
+    - .env.*
+    - '*.pem'
+    - '*.key'
+    - '*.p12'
+    - '*.pfx'
+    - '*.log'
+    - '*.tth'
+    - '*.pyc'
+    - '*.luac'
+    - credentials.json
+    - secrets.yml
+    - no-ai-slop-rules.md
+    - no-ai-slop-evaluation.md

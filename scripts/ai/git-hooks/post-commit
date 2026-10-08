@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+set -euo pipefail
+task_repo_root="$(git rev-parse --show-toplevel)"
+if command -v cce >/dev/null 2>&1; then
+    bash "$task_repo_root/scripts/ai/cce.sh" index >/dev/null 2>&1 || \
+        echo 'CCE refresh failed; run make cce-refresh after repairing local tooling.' >&2
+fi

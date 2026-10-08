@@ -1,0 +1,8 @@
+---
+description: Shared Verlihub TTHBlock project instructions
+alwaysApply: true
+---
+
+Read `AGENTS.md` and `docs/ai/skill-map.md`. Skills live in `.agents/skills`.
+Read `docs/architecture.md` before callback, SQL, NMDC or Ledokol changes.
+Use local repository retrieval and `make check`.

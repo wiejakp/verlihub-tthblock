@@ -1,0 +1,21 @@
+.cce/
+.context-mode/
+.tools/
+__pycache__/
+*.pyc
+*.luac
+*.log
+*.tth
+.env
+.env.*
+*.pem
+*.key
+*.p12
+*.pfx
+credentials.json
+secrets.yml
+.DS_Store
+
+# CCE (code-context-engine)
+# Claude Code local settings written by cce init
+.claude/settings.local.json

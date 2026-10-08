@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "context-engine": {
+      "command": "bash",
+      "args": ["scripts/ai/cce.sh", "serve"]
+    },
+    "context-mode": {
+      "command": "bash",
+      "args": ["scripts/ai/context-mode.sh"],
+      "env": {"CONTEXT_MODE_PLATFORM": "gemini-cli"}
+    }
+  }
+}

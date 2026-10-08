@@ -1,0 +1,128 @@
+{
+  "schema_version": 1,
+  "reference_project": "app_hublist",
+  "adapted_on": "2026-10-08",
+  "skills": [
+    {
+      "name": "lua-development",
+      "kind": "adapted",
+      "sources": [
+        "AGENTS.md",
+        ".agents/skills/php-code-style/SKILL.md"
+      ]
+    },
+    {
+      "name": "verlihub-ledokol",
+      "kind": "new",
+      "sources": [
+        "docs/references.md"
+      ]
+    },
+    {
+      "name": "testing-and-verification",
+      "kind": "adapted",
+      "sources": [
+        "AGENTS.md",
+        ".agents/skills/phpunit-testing/SKILL.md"
+      ]
+    },
+    {
+      "name": "agent-orchestration",
+      "kind": "adapted",
+      "sources": [
+        ".agents/skills/agent-orchestration/SKILL.md"
+      ]
+    },
+    {
+      "name": "cce-maintenance",
+      "kind": "adapted",
+      "sources": [
+        ".agents/skills/cce-maintenance/SKILL.md"
+      ]
+    },
+    {
+      "name": "debugging-and-diagnostics",
+      "kind": "adapted",
+      "sources": [
+        ".agents/skills/debugging-and-diagnostics/SKILL.md"
+      ]
+    },
+    {
+      "name": "comments",
+      "kind": "adapted",
+      "sources": [
+        ".agents/skills/comments/SKILL.md"
+      ]
+    },
+    {
+      "name": "configuration-and-secrets",
+      "kind": "adapted",
+      "sources": [
+        ".agents/skills/configuration-and-secrets/SKILL.md"
+      ]
+    },
+    {
+      "name": "security-review",
+      "kind": "adapted",
+      "sources": [
+        ".agents/skills/security-review/SKILL.md"
+      ]
+    },
+    {
+      "name": "performance-review",
+      "kind": "adapted",
+      "sources": [
+        ".agents/skills/performance-review/SKILL.md"
+      ]
+    },
+    {
+      "name": "git-and-ci",
+      "kind": "adapted",
+      "sources": [
+        ".agents/skills/git-and-ci/SKILL.md"
+      ]
+    },
+    {
+      "name": "public-writing",
+      "kind": "adapted",
+      "sources": [
+        ".agents/skills/public-writing/SKILL.md"
+      ]
+    },
+    {
+      "name": "skill-validation",
+      "kind": "adapted",
+      "sources": [
+        ".agents/skills/skill-validation/SKILL.md"
+      ]
+    }
+  ],
+  "verbatim_copies": [
+    {
+      "path": ".agents/skills/public-writing/references/no-ai-slop-rules.md",
+      "source_path": ".agents/skills/public-writing/references/no-ai-slop-rules.md",
+      "sha256": "faa35f32ab9af5318a9a85a89233c5697a8ab8ce5f984dd7f65a387d309e6290",
+      "upstream_sha256": "992b365f51a2f62cf4c1c5ed22049a9ee551dfea677550c1a72b371c0ceadd62",
+      "license": "MIT"
+    },
+    {
+      "path": ".agents/skills/public-writing/references/no-ai-slop-evaluation.md",
+      "source_path": ".agents/skills/public-writing/references/no-ai-slop-evaluation.md",
+      "sha256": "7d0e9ae6ded8f2efcef4dc892f72be16addceb051777c0cd4cb09e855e37b0b4",
+      "upstream_sha256": "8ad8d83ed1abe7fc054ad74966bfca64fc182bc71f59d701b24b962c39d11ad7",
+      "license": "MIT"
+    }
+  ],
+  "no_ai_slop_upstream": {
+    "repository": "https://github.com/petergyang/no-ai-slop",
+    "revision": "000650b156983f5159695b441477f4e63b25dc85",
+    "checked_by_reference_project": "2026-10-06",
+    "copyright": "Copyright (c) 2026 Peter Yang"
+  },
+  "adaptation_notes": [
+    "Preserved relevant coding, retrieval, privacy, writing and ownership decisions.",
+    "Replaced PHP/Symfony/PHPUnit-specific requirements with Lua and VH checks.",
+    "Removed model locks, locale workers, mandatory full-suite worker gates and UI rules.",
+    "The user specified 100 characters per line, with no fixed function-length limit."
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "hooks": {
+    "SessionStart": [{
+      "matcher": "startup|clear|compact",
+      "hooks": [{
+        "type": "command",
+        "command": "bash scripts/ai/cce.sh status --oneline"
+      }]
+    }]
+  }
+}

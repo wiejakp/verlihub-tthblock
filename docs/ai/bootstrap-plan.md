@@ -25,7 +25,7 @@ need a running hub, credentials, or an external code-analysis service.
   source revisions and checked dates. Mark live deployment checks separately.
 - [x] Configure local stdio CCE/CTX for Codex, Claude, and Gemini, isolate CCE
   storage inside this Git root, and prove retrieval and execution work.
-- [ ] Validate the skills, links, adapters, and copied-source hashes; inspect
+- [x] Validate the skills, links, adapters, and copied-source hashes; inspect
   the final diff, commit, and publish the authorized public GitHub repository.
 
 ## Ownership and verification
@@ -56,6 +56,12 @@ The destination already contained initial commit
 `486ab885d9b1d201942c2e25140a5a5f4ba99513` with a GPLv3 `LICENSE` file.
 That commit and license are preserved through a merge; no remote history is
 replaced. The README records GPLv3 and the writing references' MIT notices.
+
+The project was published to
+[wiejakp/verlihub-tthblock](https://github.com/wiejakp/verlihub-tthblock), public,
+on branch `main`. Generated runtimes, indexes, and machine-local data are
+excluded from Git. Both initialization history and the existing license commit
+remain in the published history.
 
 The local harness uses mocks. A running Verlihub/Ledokol installation, real
 SQL permissions, network binding, and hub moderation actions require live

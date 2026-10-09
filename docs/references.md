@@ -47,8 +47,12 @@ master commit `2b2f26f35b6a3da375e58ff30066e78df869a2af`.
   search `VH_OnScriptCommand`, `sefi_user_block`, `avdb_user_detect`,
   `enablesearfilt`, `avdetaction`, `scanbelowclass`, `classnotisefi`.
 - [Publisher](https://ledo.feardc.net): linked by Ledokol's repository.
-- [Original distribution link](https://ledo.feardc.net/other/): preserved from
-  the supplied script's user agent; availability was not confirmed here.
+- [Original script](https://ledo.feardc.net/other/tthblock.lua) and
+  [original distribution page](https://ledo.feardc.net/other/): origin supplied by
+  the repository owner. The direct script could not be fetched by the web tool
+  on 2026-10-08; this is attribution, not a claim of verified current contents.
+- [Maintained fork](https://github.com/wiejakp/verlihub-tthblock): version 0.0.3.8
+  builds on the supplied 0.0.3.7 file.
 - [Configured TTH list](https://te-home.net/tthblock.php?do=load): `conf.list`,
   expected one 39-character hash per line. It is a runtime data source, not a
   destination for repository contents or hub history.
@@ -78,6 +82,31 @@ its response to events. TTHBlock already drops matched search/passive frames.
 
 Newest releases are reference material. Compatibility depends on the linked
 Lua library, LuaSocket ABI, database server and installed VH APIs.
+
+## HTTP user agent
+
+- [Statcounter 2025 browser share](https://gs.statcounter.com/browser-market-share#yearly-2025-2025):
+  browser-family context for the Chrome default, not a ranking of full UA strings.
+  Its December 2025 browser CSV was checked on 2026-10-08 and lists Chrome first.
+- [Chrome 143 release notes](https://developer.chrome.com/release-notes/143):
+  stable release date 2025-12-02.
+- [Chrome User-Agent Client Hints](https://developer.chrome.com/docs/privacy-security/user-agent-client-hints):
+  reduced legacy UA format and Windows platform examples.
+
+The configurable default is a conventional late-2025 Windows Chrome 143 UA.
+It is not asserted to be the uniquely most common full string in every market.
+
+## Coverage and GitHub workflow
+
+- [LuaCov 0.17.0 source](https://github.com/lunarmodules/luacov/tree/b1f9eae400da976b93edb7f94cf5d05f538a0655):
+  complete-script line measurement; the local installer verifies the archive hash.
+- [PyYAML](https://pypi.org/project/PyYAML/6.0.3/): pinned local YAML parsing.
+- [Pinned checkout action](https://github.com/actions/checkout/tree/d23441a48e516b6c34aea4fa41551a30e30af803):
+  v6 tag resolved on 2026-10-08; read-only permission and credential persistence disabled.
+- [GitHub workflow badges](https://docs.github.com/en/actions/monitoring-and-troubleshooting-workflows/monitoring-workflows/adding-a-workflow-status-badge):
+  actual test status instead of a fixed passing label.
+
+See [testing](testing.md) for the enforced metric and local report paths.
 
 ## Local agent tooling
 

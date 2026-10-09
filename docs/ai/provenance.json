@@ -2,6 +2,17 @@
   "schema_version": 1,
   "reference_project": "app_hublist",
   "adapted_on": "2026-10-08",
+  "reinforced_on": "2026-10-08",
+  "reinforcement": {
+    "source": "repository owner instructions",
+    "policy": "RULES.md",
+    "requirements": [
+      "agents never publish code to GitHub",
+      "never commit sensitive information",
+      "preserve copyright and GPLv3 source header",
+      "readable documented code and measured 100% executable-line coverage"
+    ]
+  },
   "skills": [
     {
       "name": "lua-development",

@@ -5,6 +5,11 @@ description: Use when reviewing permissions, SQL, NMDC framing, external inputs,
 
 # Security review
 
+Apply [the repository laws](../../../RULES.md): agents never publish code, and
+sensitive information never enters commits, fixtures, docs, logs, or indexes.
+Report sensitive-data findings by path and rule without echoing the value.
+Review shell quoting and NMDC sender names when changing configurable strings.
+
 Trace the changed input through its class gate, parser, SQL/shell boundary,
 protocol framing, Ledokol event and resulting action. Use local source and
 offline fixtures. Review the changed boundary without expanding into an

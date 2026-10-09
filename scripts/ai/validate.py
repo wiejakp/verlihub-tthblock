@@ -41,7 +41,8 @@ required = {
     ".mcp.json", ".codex/config.toml", ".gemini/settings.json", "AGENTS.md",
     "CLAUDE.md", "GEMINI.md", ".github/copilot-instructions.md", ".cursor/rules/project.mdc",
     "docs/ai/provenance.json", "docs/ai/skill-map.md",
-    ".agents/skills/public-writing/references/no-ai-slop-rules.md"
+    ".agents/skills/public-writing/references/no-ai-slop-rules.md", "RULES.md", ".luacov",
+    ".github/workflows/tests.yml", "scripts/ai/git-hooks/pre-commit"
 }
 for name in required:
     check(ROOT / name in paths, f"Required artifact missing or ignored: {name}")
@@ -114,7 +115,8 @@ for path, text in texts.items():
         link_count += 1
 
 for path, text in texts.items():
-    if path.suffix in {".lua", ".py", ".sh", ".json", ".toml", ".yaml"}:
+    if path.suffix in {".lua", ".py", ".sh", ".json", ".toml", ".yaml", ".yml"} \
+            or path.name == ".luacov":
         for number, line in enumerate(text.splitlines(), 1):
             check(len(line) <= 100,
                   f"Code width {len(line)}: {path.relative_to(ROOT)}:{number}")
@@ -143,9 +145,54 @@ link = ROOT / ".claude/skills"
 check(link.is_symlink() and os.readlink(link) == "../.agents/skills",
       "Claude skills must point to the canonical in-repository directory")
 
+source = texts[ROOT / "tthblock.lua"]
+version = re.search(r'\bversion = "([\d.]+)"', source)
+check(version is not None, "Runtime version metadata is missing")
+if version:
+    protected = [
+        f"-- TTH Block {version[1]}",
+        "-- Copyright (c) 2020-2026 RoLex & PWiAM",
+        "-- Modifications Copyright (c) 2026 RoLex & PWiAM",
+        "-- Licensed under the GNU General Public License v3.0.",
+        "-- See LICENSE for details."
+    ]
+    check(source.startswith(protected[0] + "\n"), "Header and runtime versions differ")
+    check(all(line in source.splitlines()[:8] for line in protected),
+          "Protected copyright/license header is missing or changed")
+check("Agents never publish code to GitHub" in texts[ROOT / "RULES.md"],
+      "Agent publication prohibition is missing")
+hook = ROOT / "scripts/ai/git-hooks/pre-commit"
+check("python3 scripts/ai/secret_scan.py --staged" in texts[hook] and os.access(hook, os.X_OK),
+      "Pre-commit sensitive-data guard must be present and executable")
+check('include = {"^tthblock$"}' in texts[ROOT / ".luacov"]
+      and "exclude" not in texts[ROOT / ".luacov"], "Whole-script coverage scope drifted")
+
+sys.path.insert(0, str(ROOT / ".tools/python"))
+try:
+    import yaml
+except ImportError:
+    errors.append("YAML validation dependency missing; run make validation-setup")
+else:
+    try:
+        workflow = yaml.load(texts[ROOT / ".github/workflows/tests.yml"], Loader=yaml.BaseLoader)
+        check(workflow["permissions"] == {"contents": "read"}, "CI permissions must be read-only")
+        check(set(workflow["on"]) == {"push", "pull_request", "workflow_dispatch"},
+              "Unexpected CI triggers; never use pull_request_target")
+        job = workflow["jobs"]["check"]
+        check(job["strategy"]["matrix"]["lua"] == ["5.1", "5.4"], "Lua CI matrix drifted")
+        checkout = job["steps"][0]
+        check(re.fullmatch(r"actions/checkout@[0-9a-f]{40}", checkout["uses"]) is not None,
+              "CI checkout must be pinned to a full commit SHA")
+        check(checkout["with"]["persist-credentials"] == "false",
+              "CI checkout must not retain credentials")
+        check(any("make check" in step.get("run", "") for step in job["steps"]),
+              "CI must execute the full local check gate")
+    except (yaml.YAMLError, KeyError, TypeError):
+        errors.append("Invalid GitHub workflow YAML or required configuration")
+
 if errors:
     for error in errors:
         print("FAIL " + error)
     sys.exit(1)
 print(f"PASS {len(skills)} skills, {link_count} local links, provider adapters, "
-      "pinned copy hashes, JSON/TOML and 100-character code width")
+      "pinned copy hashes, JSON/TOML/YAML, protected header and 100-character code width")

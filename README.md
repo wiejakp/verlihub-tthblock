@@ -1,9 +1,19 @@
 # Verlihub TTHBlock
 
+[![Lua tests](https://github.com/wiejakp/verlihub-tthblock/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/wiejakp/verlihub-tthblock/actions/workflows/tests.yml)
+[![Line coverage gate](https://img.shields.io/badge/line_coverage_gate-100%25-blue)](docs/testing.md)
+[![Lua runtimes](https://img.shields.io/badge/Lua-5.1%20%7C%205.4-blue)](docs/testing.md)
+[![License](https://img.shields.io/github/license/wiejakp/verlihub-tthblock)](LICENSE)
+
 TTHBlock filters NMDC searches and search results for hashes from a configured
 blocklist. It runs inside Verlihub's Lua plugin and sends search-filter and AVDB
-events to Ledokol. This revision adds saved notification/log classes and retained
-SQL history to TTH Block 0.0.3.7. Credits: **Rolex & PWiAM**.
+events to Ledokol. Fork version **0.0.3.8** retains saved notification/log classes
+and SQL history, adds configurable identity and HTTP headers, and corrects
+numeric TTHS support handling. Credits: **RoLex & PWiAM**.
+
+Project: [wiejakp/verlihub-tthblock](https://github.com/wiejakp/verlihub-tthblock).
+Original script: [tthblock.lua](https://ledo.feardc.net/other/tthblock.lua), from
+[Ledokol's distribution page](https://ledo.feardc.net/other/).
 
 Notifications start muted. Blocking and history remain active. A class-10 master
 can enable notifications, set history access, and inspect retained detections.
@@ -74,6 +84,9 @@ listener startup; check private history and the hub process log instead.
 Use main chat or a PM to Hub-Security. Both `!` and `+` prefixes work, and
 command/subcommand names ignore case. Changing `conf.comm` changes the command
 name everywhere in runtime help; the default is `tthblock`.
+Replies use `conf.bot`, default `TTHBlock`. The script labels hub-generated
+messages but does not register another bot, so send PM commands to the hub's
+configured Hub-Security nickname rather than assuming the reply sender is a user.
 
 | Command | Result |
 | --- | --- |
@@ -120,7 +133,9 @@ source-level configuration and require a script reload after editing.
 | `conf` key | Default | Meaning |
 | --- | --- | --- |
 | `comm` | `tthblock` | Command name and temporary list-file basename. |
-| `from` | empty | Feed sender; select from Ledokol or fall back to OpChat's nick. |
+| `bot` | `TTHBlock` | Reply sender, default feed sender, display name and diagnostic prefix. |
+| `from` | empty | Empty follows `bot`; override with a nick, or `auto` for Ledokol selection. |
+| `user_agent` | Chrome 143 / Windows | HTTP User-Agent used by curl; full default below. |
 | `tell` | 0 | Ledokol search-block payload flag; 0 silent, 1 notify user. |
 | `clas` | 0 | Command permission; auto uses Ledokol, fallback 5. |
 | `feed` | 11 | Derived from the saved/default notification class. |
@@ -137,9 +152,31 @@ source-level configuration and require a script reload after editing.
 
 The default list URL is
 [`https://te-home.net/tthblock.php?do=load`](https://te-home.net/tthblock.php?do=load).
-Use trusted source-level URL/path values: the existing downloader places them
-in a shell command. The expected file has one uppercase 39-character base32
+The downloader quotes the URL, file path, and user agent as individual shell
+arguments and separates the URL from options with `--`. Keep configuration
+administrator-owned and never include credentials in URLs. The expected file
+has one uppercase 39-character base32
 TTH per line; the current loader checks line width and strips CR/LF.
+
+Change identity and HTTP headers in `conf`, then reload the script:
+
+```lua
+bot = "TTHBlock",
+from = "", -- follows bot; "auto" restores Ledokol's feed-sender selection
+user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 " ..
+    "(KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36",
+```
+
+This is a conventional late-2025 Windows Chrome user agent. Chrome was the
+leading browser family; browser share does not establish one universally most
+common full user-agent string. [The sources](docs/references.md#http-user-agent)
+record the 2025 browser/release references. User agents must contain 1-1024
+printable bytes without control characters. Nicknames must contain 1-64 bytes
+without spaces, control characters, `$`, `|`, `<`, or `>`.
+
+Runtime version, credits, project URL, and origin URL live in the local `plugin`
+metadata table. Update the version there and in the protected source header
+together; validation rejects a mismatch or removed copyright/license notices.
 
 | `defaults` key | Default |
 | --- | --- |
@@ -211,14 +248,30 @@ indefinitely during callbacks.
 ## Development and AI agents
 
 ```sh
+make setup
 make check
 ```
 
-This runs syntax checks, offline callback tests, and local skill/config/link
-validation. Development checks need Python 3.11+ and make, in addition to Lua.
+`make setup` installs checksum-verified LuaCov 0.17.0 and pinned PyYAML 6.0.3
+inside ignored `.tools/`. Development checks need Python 3.11+ with pip, make,
+and Lua. `make check` checks syntax, runs the offline suite with a strict 100%
+executable-line coverage gate, validates skills/configuration/header integrity,
+and runs the local sensitive-data guard and its tests.
 Override `LUA`/`LUAC` to use another installed interpreter, for example
 `make check LUA=lua5.1 LUAC=luac5.1`. Tests fake VH, SQL, sockets, clock, files and
 downloads; they do not connect to a hub or run the real downloader.
+
+The GitHub workflow runs the same gate on Lua 5.1 and 5.4 with read-only
+permissions and no retained checkout credentials. Its status badge reports
+GitHub's actual result; it is pending until a human publishes the workflow and
+GitHub executes it. The coverage badge describes the enforced target.
+[Testing details](docs/testing.md) explain reports and the limits of offline coverage.
+
+[Repository laws](RULES.md) prohibit agents from pushing or otherwise publishing
+code to GitHub, committing sensitive information, or removing the script's
+copyright/license header. A human reviews and publishes changes. The local
+pre-commit guard scans staged content and reports paths/rules without exposing
+matched values; manual review is still required.
 
 [AGENTS.md](AGENTS.md) contains shared instructions for any AI agent.
 Claude, Gemini, Codex, Copilot and Cursor have small adapters. Relevant Lua,

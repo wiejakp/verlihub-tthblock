@@ -4,6 +4,11 @@ These instructions apply to every AI agent working in this repository.
 `CLAUDE.md`, `GEMINI.md`, and editor adapters point here. Shared skills live in
 `.agents/skills/`; load only relevant skills using [the skill map](docs/ai/skill-map.md).
 
+Read [the repository laws](RULES.md) first. Agents must never publish code to
+GitHub by push, API upload, PR, worker, automation, or another indirect route.
+The human owner handles publication. Never commit, log, index, or transmit
+sensitive data. Earlier publication authorization does not override this rule.
+
 ## Repository and context
 
 Run `git rev-parse --show-toplevel` before persistent retrieval or recursive
@@ -24,7 +29,7 @@ project information local except for the AI service explicitly chosen by the
 user. Use local stdio CCE/CTX. Do not add remote MCP, hosted code analysis,
 external detectors, remote embeddings, or remote Ollama. Public documentation
 queries use generic terms and no repository data. Network access is for requested
-public information or necessary dependencies. Publication needs authorization.
+public information or necessary dependencies. Agent publication is prohibited.
 
 Do not read or index `.env`, keys, credentials, database dumps, or production
 configuration. Filter sensitive output before it reaches context. Stay inside
@@ -67,6 +72,9 @@ commands, the Lua header, runtime help, and tests consistent. Comments explain
 an invariant, compatibility condition, or concrete hazard.
 
 Run `make check` for code/configuration changes before claiming completion.
+The complete script must meet the measured 100% executable-line coverage gate.
+Run the local sensitive-data check before any commit; review staged content
+manually as well. Never bypass hooks or print discovered secret values.
 Behavior changes need focused regressions; prose-only changes need `make validate`
 and factual checks, rather than unchanged runtime tests or mirrored prose tests.
 Route large test output through CTX. Report actual runtimes and checks.

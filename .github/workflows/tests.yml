@@ -1,0 +1,37 @@
+name: Lua tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: lua-tests-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Lua ${{ matrix.lua }} / coverage and integrity
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        lua: ['5.1', '5.4']
+    steps:
+      - name: Check out source without retaining credentials
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Install the declared Lua runtime
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y lua${{ matrix.lua }}
+      - name: Install pinned local verification dependencies
+        run: make setup
+      - name: Check syntax, 100% line coverage, skills and sensitive data
+        run: make check LUA=lua${{ matrix.lua }} LUAC=luac${{ matrix.lua }}

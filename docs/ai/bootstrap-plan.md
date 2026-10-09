@@ -1,5 +1,8 @@
 # Project bootstrap
 
+Historical bootstrap record. The later [repository laws](../../RULES.md)
+prohibit further agent publication; this record is not authorization to push.
+
 Requested on 2026-10-08. GitHub destination: `wiejakp/verlihub-tthblock`, public.
 Code width: at most 100 characters per line. Work stays in this repository;
 `app_hublist` is the explicitly authorized, read-only reference project.

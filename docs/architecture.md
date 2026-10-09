@@ -1,7 +1,7 @@
 # Runtime contracts
 
-This document describes the supplied TTH Block 0.0.3.7 revision, including its
-saved class settings and history. Read it with `tthblock.lua` and
+This document describes fork version 0.0.3.8, based on supplied TTH Block 0.0.3.7,
+including its saved class settings and history. Read it with `tthblock.lua` and
 [the pinned primary sources](references.md). The script is hosted by Verlihub's
 Lua plugin; `VH` is the plugin binding and Ledokol is a separate loaded Lua script.
 
@@ -31,16 +31,22 @@ table; it does not continuously synchronize runtime defaults with Ledokol.
 
 | Ledokol setting | TTHBlock use |
 | --- | --- |
-| `enablesearfilt`, `addsefifeed`, `sefifeednick` | First feed-sender choice. |
-| `useextrafeed`, `extrafeednick` | Second sender choice. |
-| `addledobot`, `ledobotnick` | Third sender choice, then `VH.OpChat`. |
+| `enablesearfilt`, `addsefifeed`, `sefifeednick` | First sender choice when `from = "auto"`. |
+| `useextrafeed`, `extrafeednick` | Second automatic sender choice. |
+| `addledobot`, `ledobotnick` | Third automatic sender choice, then `VH.OpChat`. |
 | `avsearchint`, `avsearservaddr` | UDP address when AV scanning is configured. |
 | `sefireason`, `thirdacttime` | Auto kick reason and ban-marker duration. |
 | `mincommandclass` | Auto command permission, otherwise fallback 5. |
 | `classnotisefi` | Auto notification threshold; invalid/mute-11 falls back to 4. |
 | `scanbelowclass` | Exclusive scan ceiling; fallback 2. |
 
-Feed sender fallback uses the OpChat nickname as a PM sender; delivery still
+`conf.bot` defaults to `TTHBlock` for reply frames, display names, and diagnostics.
+An empty `conf.from` follows it. An explicit nickname overrides the feed sender;
+`conf.from = "auto"` selects the Ledokol chain above. There is no robot-registration
+API call; hub commands still arrive through main chat or PM to `VH.HubSec`.
+Nickname configuration rejects NMDC delimiters and control characters.
+
+Automatic feed sender fallback uses the OpChat nickname as a PM sender; delivery still
 uses `SendPMToAll` with explicit minimum/maximum classes. It does not broadcast
 through OpChat, which would bypass this script's recipient filter.
 
@@ -69,9 +75,11 @@ file. A usable new list replaces the map and preserves existing hit counts.
 Missing/empty/unusable files leave the current map. The temporary file is
 removed after a successful open/parse, and `serv.mins` records refresh time.
 
-The downloader is synchronous. `conf.list` and the config directory/basename
-are interpolated into a shell command as trusted administrator-owned values.
-They must not become user-controlled parameters without changing that boundary.
+The downloader is synchronous. `conf.user_agent`, the download path, and
+`conf.list` are individually single-quoted, including escaped embedded quotes.
+`--` separates the URL from curl options. Configuration remains administrator-owned;
+HTTP(S) URLs, safe command basenames, and printable user agents are validated on load.
+The default is a Windows Chrome 143 user agent from late 2025.
 
 `VH_OnTimer(msec)` first drains queued history, even if UDP is unavailable.
 With a listener it consumes at most ten datagrams, each potentially containing
@@ -83,8 +91,9 @@ When APIs exist, probes iterate the nick list, skip bots and zero-share users,
 and use `$SA` for supported TTHS clients or `$Search` otherwise. Older API paths
 send `$Search` to the eligible class range. Delayed sends use the configured
 `delayed_search` and the compatibility version gate.
-Lua numeric zero is truthy: review the `InUserSupports` conversion carefully
-if changing that branch or using a build that returns numeric support flags.
+Lua numeric zero is truthy. TTHS support therefore requires boolean `true` or
+numeric/string value `1`; `0`, `"0"`, `false`, and nil select the ordinary `$Search`.
+The offline suite checks the previously incorrect numeric-zero path.
 
 ## NMDC and detection paths
 

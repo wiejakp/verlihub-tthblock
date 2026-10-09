@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="199" height="20"
+  viewBox="0 0 199 20" role="img" aria-labelledby="title description">
+  <title id="title">Line coverage (local): 100%</title>
+  <desc id="description">
+    551/551 executable lines; Lua 5.4
+    Script, suite and coverage configuration SHA256:
+    e11c0be014580d1a7ef389f17030cec2d0bbd4d07b87ec598548478a288c3ee3
+  </desc>
+  <rect width="199" height="20" rx="3" fill="#4c1"/>
+  <path d="M3 0h156v20H3a3 3 0 0 1-3-3V3a3 3 0 0 1 3-3" fill="#555"/>
+  <g fill="#fff" text-anchor="middle" font-family="Verdana,Arial,sans-serif" font-size="11">
+    <text x="79.5" y="14">Line coverage (local)</text>
+    <text x="179" y="14">100%</text>
+  </g>
+</svg>

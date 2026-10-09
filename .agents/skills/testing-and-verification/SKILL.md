@@ -11,8 +11,10 @@ exclusions. Test startup, timers, protocol handling, commands, and failures.
 State the metric and Lua versions; do not claim branch or live-hub coverage
 from a line report. Run `make coverage` and `make secrets` before completion.
 
-Run `make syntax` for syntax, `make test` for offline runtime contracts, and
+Run `make syntax` for syntax, `make test` for covered offline runtime contracts, and
 `make validate` for skill/config/link/copy integrity. `make check` combines them.
+`make test-tooling` exercises badge failure/freshness handling; `make badges`
+reruns the callback suite and coverage to regenerate the local SVG results.
 Use CTX for substantial output. Print exit status and relevant failures.
 
 Add a regression before a behavioral fix when feasible. Assert observable

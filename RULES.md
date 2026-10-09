@@ -33,9 +33,12 @@ Read them before editing, staging, committing, or using a networked tool.
    exclude hard-to-test source lines, fabricate a percentage, or call line
    coverage branch coverage. Test observable behavior and failures, not merely
    whether a line runs. Live deployment checks remain a separate requirement.
-7. **Use truthful badges and reports.** Test status comes from the actual GitHub
-   workflow. Coverage claims come from the enforced local/CI measurement. A new
-   workflow is pending until the human publishes it and GitHub runs it.
+7. **Use truthful badges and reports.** Label generated local results separately
+   from GitHub CI status. Regenerate local badges from a fresh test/coverage run,
+   clear stale passing values on failure, and publish them with the tested source.
+   Coverage claims come from the enforced measurement. The CI badge reads actual
+   GitHub workflow status; local tests do not change it. A new workflow is pending
+   until the human publishes it and GitHub runs it.
 
 The user's current instructions override earlier publication authorization.
 These laws reinforce [AGENTS.md](AGENTS.md) and the

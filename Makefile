@@ -2,11 +2,12 @@ LUA ?= lua
 LUAC ?= luac
 PYTHON ?= python3
 
-.PHONY: setup check syntax test coverage coverage-setup validation-setup secrets validate
+.PHONY: setup check syntax test badges test-tooling coverage coverage-setup
+.PHONY: validation-setup secrets validate
 .PHONY: ai-init ai-check
 .PHONY: cce-status cce-refresh
 
-check: syntax coverage validate secrets
+check: syntax test-tooling coverage validate secrets
 
 setup: coverage-setup validation-setup
 
@@ -14,8 +15,12 @@ syntax:
 	$(LUAC) -p tthblock.lua
 	$(LUAC) -p tests/tthblock_test.lua
 
-test:
-	$(LUA) tests/tthblock_test.lua
+test: coverage
+
+badges: coverage
+
+test-tooling:
+	$(PYTHON) tests/badges_test.py
 
 coverage-setup:
 	$(PYTHON) scripts/testing/coverage.py --setup

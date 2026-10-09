@@ -21,6 +21,8 @@ explicitly instructed.
 
 Verification is local. Configure the requested GitHub test workflow locally;
 only a human's publication activates it. Never upload to hosted code analysis.
+`make test`, `make coverage`, or `make badges` regenerates local SVG badges.
+Review them with the tested source; distinguish local results from GitHub CI.
 CCE post-commit refresh
 is optional and local; it is not a substitute for checking runtime behavior.
 Report actual local checks and which changes remain for the human to publish.

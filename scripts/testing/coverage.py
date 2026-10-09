@@ -11,6 +11,8 @@ import sys
 import tarfile
 import urllib.request
 
+from badges import Badges, FAIL, PASS, PENDING
+
 ROOT = Path(__file__).resolve().parents[2]
 VERSION = "0.17.0"
 REVISION = "b1f9eae400da976b93edb7f94cf5d05f538a0655"
@@ -52,8 +54,12 @@ def setup() -> None:
 
 
 def measure(lua: str) -> int:
-    """Discard prior measurements and require a complete, nonempty script report."""
+    """Reset badges and measurements, then publish only this run's local results."""
+    badges = Badges(ROOT)
+    badges.write("tests", "not run", PENDING)
+    badges.write("coverage", "not measured", PENDING)
     if not (RUNTIME / "src/luacov.lua").is_file():
+        badges.write("tests", "error", FAIL, "LuaCov dependency is missing")
         print("LuaCov is missing; run make coverage-setup", file=sys.stderr)
         return 1
     OUTPUT.mkdir(parents=True, exist_ok=True)
@@ -62,22 +68,52 @@ def measure(lua: str) -> int:
     environment = dict(os.environ)
     environment["LUA_PATH"] = str(RUNTIME / "src/?.lua")
     environment["LUA_CPATH"] = ""
-    result = subprocess.run(
-        [lua, "-lluacov", "tests/tthblock_test.lua"], cwd=ROOT, env=environment, check=False
-    )
+    try:
+        result = subprocess.run(
+            [lua, "-lluacov", "tests/tthblock_test.lua"], cwd=ROOT, env=environment,
+            stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, check=False
+        )
+    except OSError:
+        badges.write("tests", "error", FAIL, "The Lua interpreter could not start")
+        raise
+    print(result.stdout, end="")
     if result.returncode:
+        badges.write("tests", "failed", FAIL, "The offline callback suite failed")
         return result.returncode
+    summary = re.search(
+        r"^Passed ([1-9][0-9]*) offline callback tests on (Lua [0-9]+\.[0-9]+)$",
+        result.stdout, re.M
+    )
+    if not summary:
+        badges.write("tests", "error", FAIL, "A nonempty suite summary is missing")
+        print("FAIL nonempty offline callback test summary is missing", file=sys.stderr)
+        return 1
+    count, runtime = summary.groups()
+    badges.write("tests", f"{count} passed", PASS, runtime)
     report = OUTPUT / "luacov.report.out"
     if not report.is_file():
+        badges.write("coverage", "error", FAIL, "The current coverage report is missing")
         print("FAIL coverage report was not generated", file=sys.stderr)
         return 1
     text = report.read_text()
     match = re.search(r"^tthblock\.lua\s+(\d+)\s+(\d+)\s+([\d.]+)%$", text, re.M)
     if not match:
+        badges.write("coverage", "error", FAIL, "The complete script summary is missing")
         print("FAIL complete tthblock.lua coverage summary is missing", file=sys.stderr)
         return 1
     hits, missed = int(match[1]), int(match[2])
     total = hits + missed
+    if not total:
+        badges.write("coverage", "error", FAIL, "No executable script lines were measured")
+        print("FAIL coverage report has no executable script lines", file=sys.stderr)
+        return 1
+    # Truncate to two decimals so an uncovered line can never round up to 100%.
+    hundredths = hits * 10000 // total
+    percentage = f"{hundredths // 100}.{hundredths % 100:02d}".rstrip("0").rstrip(".")
+    badges.write(
+        "coverage", percentage + "%", PASS if hits and not missed else FAIL,
+        f"{hits}/{total} executable lines; {runtime}"
+    )
     if not hits or missed:
         source = (ROOT / "tthblock.lua").read_text().splitlines()
         rows = text.splitlines()
@@ -90,6 +126,7 @@ def measure(lua: str) -> int:
         print("Uncovered tthblock.lua lines: " + ", ".join(uncovered))
         return 1
     print(f"PASS tthblock.lua coverage: {hits}/{total} executable lines, 100%; no exclusions")
+    print("PASS local badges regenerated in docs/badges/")
     return 0
 
 

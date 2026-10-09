@@ -1,7 +1,8 @@
 # Verlihub TTHBlock
 
-[![Lua tests](https://github.com/wiejakp/verlihub-tthblock/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/wiejakp/verlihub-tthblock/actions/workflows/tests.yml)
-[![Line coverage gate](https://img.shields.io/badge/line_coverage_gate-100%25-blue)](docs/testing.md)
+[![Lua tests (local)](docs/badges/tests.svg)](docs/testing.md)
+[![Line coverage (local)](docs/badges/coverage.svg)](docs/testing.md)
+[![GitHub CI](https://github.com/wiejakp/verlihub-tthblock/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/wiejakp/verlihub-tthblock/actions/workflows/tests.yml)
 [![Lua runtimes](https://img.shields.io/badge/Lua-5.1%20%7C%205.4-blue)](docs/testing.md)
 [![License](https://img.shields.io/github/license/wiejakp/verlihub-tthblock)](LICENSE)
 
@@ -261,10 +262,23 @@ Override `LUA`/`LUAC` to use another installed interpreter, for example
 `make check LUA=lua5.1 LUAC=luac5.1`. Tests fake VH, SQL, sockets, clock, files and
 downloads; they do not connect to a hub or run the real downloader.
 
+`make test`, `make coverage`, and `make check` regenerate the local test and
+coverage badges from that run. To regenerate them explicitly:
+
+```sh
+make badges
+git diff -- docs/badges/
+```
+
+Commit `docs/badges/tests.svg` and `docs/badges/coverage.svg` with your changes
+after reviewing the results. GitHub displays the updated local badges once you
+push them. These badges record the last local run with its Lua version and a
+digest of the script, suite, and coverage configuration. Failures replace old
+passing results; an unavailable coverage measurement clears the old percentage.
+
 The GitHub workflow runs the same gate on Lua 5.1 and 5.4 with read-only
-permissions and no retained checkout credentials. Its status badge reports
-GitHub's actual result; it is pending until a human publishes the workflow and
-GitHub executes it. The coverage badge describes the enforced target.
+permissions and no retained checkout credentials. The separate GitHub CI badge
+reports actual workflow runs on `main`; local commands do not change its status.
 [Testing details](docs/testing.md) explain reports and the limits of offline coverage.
 
 [Repository laws](RULES.md) prohibit agents from pushing or otherwise publishing

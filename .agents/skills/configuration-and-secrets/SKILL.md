@@ -5,6 +5,12 @@ description: Use when changing Lua defaults, saved settings, dependency setup, M
 
 # Configuration and secrets
 
+Read [the repository laws](../../../RULES.md). Never commit credentials, keys,
+real hub data, logs, production settings, or private machine data. Use synthetic
+fixtures. Never put confidential values in shell arguments, output, URLs, or
+public CI configuration. Run `make secrets`; inspect intended and staged files.
+An ignore rule does not remove sensitive data already tracked in Git.
+
 Trace source defaults, Ledokol auto values, saved SQL values, and effective
 runtime classes separately. Only `feed` and `logclass` are persisted by this
 script. Changing defaults does not overwrite saved settings on reload.

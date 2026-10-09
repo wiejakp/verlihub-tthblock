@@ -1,0 +1,7 @@
+return {
+	include = {"^tthblock$"},
+	statsfile = ".tools/coverage/luacov.stats.out",
+	reportfile = ".tools/coverage/luacov.report.out",
+	runreport = true,
+	deletestats = false
+}

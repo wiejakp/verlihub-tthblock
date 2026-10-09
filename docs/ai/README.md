@@ -4,6 +4,10 @@
 [the skill map](skill-map.md) and load only relevant instructions. Skills are
 portable Markdown/frontmatter. An agent without native skills can read them directly.
 
+[Repository laws](../../RULES.md) are mandatory: agents never push or otherwise
+publish code to GitHub, never commit sensitive data, and never remove the main
+script's attribution/license header. Humans review and publish local changes.
+
 | Client | Instructions | Local MCP configuration |
 | --- | --- | --- |
 | Codex | `AGENTS.md`, `.agents/skills` | `.codex/config.toml` |
@@ -62,7 +66,9 @@ enables `hooks`/`plugin_hooks`; an installed/trusted Context Mode plugin and
 client support are still required for its automatic hooks. Gemini hooks depend
 on its client/plugin. Follow CTX routing in `AGENTS.md` even without hooks.
 
-A versioned optional post-commit hook refreshes the local incremental index.
+A versioned pre-commit hook checks Git's staged content with the local
+sensitive-data guard. Its findings contain only a path and rule, never the
+matched value. The post-commit hook refreshes the local incremental index.
 Enable it when the project has no unrelated hook setup:
 
 ```sh
@@ -77,7 +83,10 @@ nested workers, shared-file writers and trivial delegated edits. A worker gets
 a bounded objective/ownership/check packet; CCE supplies source and CTX supplies
 applicable decisions. The main agent owns integration and completion.
 
-`make check` validates runtime and instruction artifacts. Copied no-ai-slop
+Run `make setup` once before `make check`. The gate validates the complete Lua
+script at 100% executable-line coverage, instruction artifacts, workflow,
+protected source header, and sensitive-data rules. See [testing](../testing.md).
+Copied no-ai-slop
 rules/evaluation retain the pinned wrapper and MIT notice; hashes are checked
 locally. [Provenance](provenance.json) lists adapted app_hublist practices.
 PHP/Symfony/frontend-only skills were not ported into this Lua project.

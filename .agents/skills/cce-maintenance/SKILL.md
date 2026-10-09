@@ -5,6 +5,11 @@ description: Use when discovering repository context, checking CCE health, or re
 
 # CCE maintenance
 
+Apply [the repository laws](../../../RULES.md). Never index credentials, private
+hub data, production configuration, raw logs, or downloaded runtimes. Do not
+register remote retrieval, embeddings, telemetry, or memory services. Keep
+changed source/document refreshes inside this exact repository.
+
 Resolve the Git root before using a persistent index. Use the matching local
 MCP server or `bash scripts/ai/cce.sh`; never borrow another project's index.
 The wrapper pins the root and local FastEmbed; `.context-engine.yaml` places

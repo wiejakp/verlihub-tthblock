@@ -5,6 +5,12 @@ description: Use when changing callback behavior, fixing a bug, or verifying Lua
 
 # Testing and verification
 
+Apply [the repository laws](../../../RULES.md). Require measured 100%
+executable-line coverage of the entire `tthblock.lua` file, without source-line
+exclusions. Test startup, timers, protocol handling, commands, and failures.
+State the metric and Lua versions; do not claim branch or live-hub coverage
+from a line report. Run `make coverage` and `make secrets` before completion.
+
 Run `make syntax` for syntax, `make test` for offline runtime contracts, and
 `make validate` for skill/config/link/copy integrity. `make check` combines them.
 Use CTX for substantial output. Print exit status and relevant failures.

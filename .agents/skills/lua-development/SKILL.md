@@ -5,6 +5,11 @@ description: Use when editing tthblock.lua or its offline Lua tests.
 
 # Lua development
 
+Apply [the repository laws](../../../RULES.md). Retain attribution and license
+notices. Keep runtime version/credits in one metadata table and configurable
+identity/HTTP strings in `conf`; quote each shell argument separately. Reject
+invalid NMDC nickname characters rather than inserting them into frame headers.
+
 Read [the runtime contracts](../../../docs/architecture.md) and
 [primary references](../../../docs/references.md) for the affected API.
 

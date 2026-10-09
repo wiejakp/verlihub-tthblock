@@ -1,6 +1,10 @@
--- TTH Block 0.0.3.7
--- © 2020-2026 Rolex & PWiAM
--- Local revision: notification classes and retained history.
+-- TTH Block 0.0.3.8
+-- Copyright (c) 2020-2026 RoLex & PWiAM
+-- Modifications Copyright (c) 2026 RoLex & PWiAM
+--
+-- Licensed under the GNU General Public License v3.0.
+-- See LICENSE for details.
+-- Fork revision: configurable identity, HTTP user agent, and retained history.
 --
 -- INSTALLATION
 -- Verlihub must have its Lua plugin enabled. Load Ledokol first for its search
@@ -37,6 +41,11 @@
 --
 -- CONFIGURATION AND INTEGRATION
 -- Edit defaults/conf below before loading. Auto mode reads lua_ledo_conf.
+-- conf.user_agent configures curl's HTTP User-Agent; the default is a 2025
+-- Windows Chrome 143 user agent. It is source configuration, not a hub command.
+-- conf.bot defaults to TTHBlock for replies, help, and feed messages. Use
+-- conf.from to override the feed sender, or "auto" for Ledokol's sender chain.
+-- This script labels hub-generated messages; it does not register another bot.
 -- conf.skip is an exclusive class ceiling before Main converts it to inclusive.
 -- The UDP listener advertises conf.addr:conf.port to clients; set a reachable
 -- local interface address and allow UDP port 20201 for active result scanning.
@@ -51,9 +60,18 @@
 -- conf.kick applies to forbidden search requests; results follow Ledokol AVDB.
 --
 -- README: https://github.com/wiejakp/verlihub-tthblock
+-- Original script: https://ledo.feardc.net/other/tthblock.lua
+-- Original repository page: https://ledo.feardc.net/other/
 -- Contracts and primary links: docs/architecture.md and docs/references.md.
 -- Verlihub Lua API: https://github.com/Verlihub/verlihub/wiki/API-Lua-Methods
 -- Ledokol: https://github.com/Verlihub/ledokol
+
+local plugin = {
+	version = "0.0.3.8",
+	authors = "RoLex & PWiAM",
+	homepage = "https://github.com/wiejakp/verlihub-tthblock",
+	origin = "https://ledo.feardc.net/other/tthblock.lua"
+}
 
 -- Saved class settings override these defaults after the first load.
 local defaults = {
@@ -73,7 +91,10 @@ local defaults = {
 list = {}
 conf = {
 	comm = "tthblock", -- statistics command
-	from = "", -- notification feed nick, empty for auto
+	bot = "TTHBlock", -- default message sender and display name
+	user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 " ..
+		"(KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36", -- 2025 Chrome on Windows
+	from = "", -- feed sender override; empty follows bot, "auto" follows Ledokol
 	tell = 0, -- notification to user
 	clas = 0, -- command usage class, zero for auto
 	feed = defaults.notification_class, -- notification feed class, zero for auto
@@ -106,6 +127,16 @@ local auto_feed = 4
 local storage = {settings = false, logs = false, count = 0}
 local deliveries, requested = {}, {}
 
+local function shellquote (value)
+	-- Single quotes prevent expansion; an embedded quote needs its own escaped segment.
+	return "'" .. value:gsub ("'", "'\\''") .. "'"
+end
+
+local function validnick (value)
+	return type (value) == "string" and # value > 0 and # value <= 64 and
+		not value:find ("[ %c$|<>]")
+end
+
 local function validclass (value, disabled)
 	return type (value) == "number" and value == math.floor (value) and
 		((value >= 0 and value <= 5) or value == MASTER_CLASS or (disabled and value == 11))
@@ -131,7 +162,7 @@ end
 
 local function storageerror (kind, message)
 	storage [kind] = false
-	print ("[TTHBlock] " .. message ..
+	print ("[" .. conf.bot .. "] " .. message ..
 		" Repair the database permissions or connection, then reload this script.")
 end
 
@@ -231,10 +262,10 @@ end
 local function reply (nick, data, pm)
 	local text = nmdcsafe (data)
 	if tonumber (pm) == 1 then
-		return VH:SendToUser ("$To: " .. nick .. " From: " .. VH.HubSec ..
-			" $<" .. VH.HubSec .. "> " .. text .. "|", nick)
+		return VH:SendToUser ("$To: " .. nick .. " From: " .. conf.bot ..
+			" $<" .. conf.bot .. "> " .. text .. "|", nick)
 	end
-	return VH:SendToUser ("<" .. VH.HubSec .. "> " .. text .. "|", nick)
+	return VH:SendToUser ("<" .. conf.bot .. "> " .. text .. "|", nick)
 end
 
 local function canreadlogs (clas)
@@ -257,7 +288,7 @@ local function drainlogs (now)
 				bytes = bytes + # line + 2
 				job.pos = job.pos + 1
 			end
-			local text = "TTHBlock logs (newest first, UTC):\r\n" .. table.concat (lines, "\r\n")
+			local text = conf.bot .. " logs (newest first, UTC):\r\n" .. table.concat (lines, "\r\n")
 			local done = job.pos > # job.rows
 			if done then text = text .. "\r\nEnd of history." end
 			if not reply (nick, text, 1) or done then
@@ -272,21 +303,21 @@ end
 local function requestlogs (nick, count)
 	if not storage.logs then
 		reply (nick,
-			"TTHBlock log storage is unavailable. Check the hub process log and reload after repair.", 1)
+			conf.bot .. " log storage is unavailable. Check the hub log and reload after repair.", 1)
 		return
 	end
 	local now, active = os.time (), 0
 	if deliveries [nick] then
-		reply (nick, "A TTHBlock log export is already in progress.", 1)
+		reply (nick, "A " .. conf.bot .. " log export is already in progress.", 1)
 		return
 	end
 	if requested [nick] and now - requested [nick] < defaults.log_request_cooldown then
-		reply (nick, "Wait before requesting another TTHBlock log export.", 1)
+		reply (nick, "Wait before requesting another " .. conf.bot .. " log export.", 1)
 		return
 	end
 	for _ in pairs (deliveries) do active = active + 1 end
 	if active >= defaults.log_max_readers then
-		reply (nick, "TTHBlock log exports are busy. Try again after an export finishes.", 1)
+		reply (nick, conf.bot .. " log exports are busy. Try after an export finishes.", 1)
 		return
 	end
 	local rows = query ("select `id`, `created_at`, `message` from `lua_tthblock_logs` " ..
@@ -301,7 +332,7 @@ local function requestlogs (nick, count)
 		end
 	end
 	if rows == nil then
-		reply (nick, "Failed to read TTHBlock logs.", 1)
+		reply (nick, "Failed to read " .. conf.bot .. " logs.", 1)
 		return
 	end
 	local result = {}
@@ -309,7 +340,7 @@ local function requestlogs (nick, count)
 	for row = 0, rows - 1 do
 		local ok, id, created, message = VH:SQLFetch (row)
 		if not ok or not tonumber (created) then
-			reply (nick, "Failed to read a TTHBlock log entry.", 1)
+			reply (nick, "Failed to read a " .. conf.bot .. " log entry.", 1)
 			return
 		end
 		result [# result + 1] = "#" .. id .. " " ..
@@ -317,37 +348,47 @@ local function requestlogs (nick, count)
 	end
 	requested [nick] = now
 	if # result == 0 then
-		reply (nick, "No TTHBlock logs are available yet.", 1)
+		reply (nick, "No " .. conf.bot .. " logs are available yet.", 1)
 		return
 	end
 	deliveries [nick] = {rows = result, pos = 1, next = now}
 	reply (nick, "Sending the latest " .. _tostring (# result) ..
-		" TTHBlock log entries in private batches.", 1)
+		" " .. conf.bot .. " log entries in private batches.", 1)
 end
 
 local function setclass (nick, name, value)
 	if not storage.settings then
-		reply (nick, "TTHBlock settings storage is unavailable; the setting was not changed.", 1)
+		reply (nick, conf.bot .. " settings storage is unavailable; the setting was not changed.", 1)
 		return
 	end
 	local ok, changed = writequery (
 		"replace into `lua_tthblock_settings` (`variable`, `value`) values ('" ..
 		name .. "', " .. _tostring (value) .. ")")
 	if not ok or changed < 1 then
-		reply (nick, "Failed to save the TTHBlock setting; the current value is unchanged.", 1)
+		reply (nick, "Failed to save the " .. conf.bot .. " setting; its value is unchanged.", 1)
 		return
 	end
 	settings [name] = value
 	applysettings ()
 	writelog ("Setting " .. name .. " changed to " .. _tostring (value) .. " by " .. nick)
 	local effective = name == "feed" and conf.feed or conf.logclass
-	reply (nick, "TTHBlock " .. name .. " = " .. _tostring (value) ..
+	reply (nick, conf.bot .. " " .. name .. " = " .. _tostring (value) ..
 		(value == 0 and " (auto; effective class " .. _tostring (effective) .. ")" or "") ..
 		(name == "feed" and effective == 11 and
 			"; automatic notifications disabled. Blocking and logging are unchanged." or "."), 1)
 end
 
 local function checkdefaults ()
+	assert (validnick (conf.bot), "Invalid bot nickname: use 1-64 bytes without NMDC delimiters")
+	assert (type (conf.from) == "string" and
+		(conf.from == "" or conf.from == "auto" or validnick (conf.from)), "Invalid feed sender")
+	assert (type (conf.user_agent) == "string" and # conf.user_agent > 0 and
+		# conf.user_agent <= 1024 and not conf.user_agent:find ("[%z\1-\31\127]"),
+		"Invalid user_agent: use 1-1024 printable bytes without control characters")
+	assert (type (conf.comm) == "string" and conf.comm:match ("^[%w_-]+$"),
+		"Invalid command name: use letters, numbers, underscore or hyphen")
+	assert (type (conf.list) == "string" and conf.list:match ("^https?://") and
+		not conf.list:find ("[%z\1-\31\127]"), "Invalid blocklist HTTP(S) URL")
 	assert (validclass (defaults.notification_class, true), "Invalid notification_class default")
 	assert (validclass (defaults.log_class, false), "Invalid log_class default")
 	local ranges = {
@@ -413,6 +454,8 @@ function Main (file)
 		test [key] = tostring (test [key])
 	end
 	if # conf.from == 0 then -- feed nick
+		conf.from = conf.bot
+	elseif conf.from == "auto" then
 		if test.enablesearfilt == 1 and test.addsefifeed == 1 and # test.sefifeednick > 0 then
 			conf.from = test.sefifeednick
 		elseif test.useextrafeed == 1 and # test.extrafeednick > 0 then
@@ -577,7 +620,8 @@ function VH_OnTimer (msec)
 
 						if not info:match ("%$0%$$") then
 							local _, tths = VH:InUserSupports (nick, "TTHS")
-							if (type (tths) == "number" and tonumber (tths) == 1) or tths then
+							-- The binding can return numeric 0; Lua treats that value as truthy.
+							if tths == true or tonumber (tths) == 1 then
 								info = "$SA " .. serv.list [serv.item] .. " " .. conf.addr ..
 									":" .. _tostring (conf.port) .. "|"
 							else
@@ -679,8 +723,8 @@ end
 local function commandhelp ()
 	local cmd = "!" .. conf.comm
 	return table.concat ({
-		"TTHBlock 0.0.3.7 - Rolex & PWiAM",
-		"Use ! or + in main chat or a PM to Hub-Security; command names ignore case.",
+		conf.bot .. " " .. plugin.version .. " - " .. plugin.authors,
+		"Use ! or + in main chat or a PM to " .. VH.HubSec .. "; command names ignore case.",
 		cmd .. " - current in-memory hit statistics",
 		cmd .. " help - commands and permissions (unknown subcommands also show help)",
 		cmd .. " class - show configured/effective notification class",
@@ -699,7 +743,9 @@ local function commandhelp ()
 			_tostring (defaults.log_request_cooldown) .. "s; batch interval: " ..
 			_tostring (defaults.log_batch_interval) .. "s.",
 		"Each private batch has at most " .. _tostring (defaults.log_batch_lines) ..
-			" entries and " .. _tostring (defaults.log_batch_bytes) .. " body bytes."
+			" entries and " .. _tostring (defaults.log_batch_bytes) .. " body bytes.",
+		"Project: " .. plugin.homepage,
+		"Original script: " .. plugin.origin
 	}, "\r\n")
 end
 
@@ -715,7 +761,7 @@ function VH_OnHubCommand (nick, data, op, pm)
 		local key = action == "class" and "feed" or "logclass"
 		if value ~= "" then
 			if clas ~= MASTER_CLASS then
-				reply (nick, "Only a class-10 master may change TTHBlock settings.", 1)
+				reply (nick, "Only a class-10 master may change " .. conf.bot .. " settings.", 1)
 				return 0
 			end
 			local number = value:match ("^%d+$") and tonumber (value) or nil
@@ -727,19 +773,19 @@ function VH_OnHubCommand (nick, data, op, pm)
 			setclass (nick, key, number)
 		elseif clas == MASTER_CLASS or (clas >= 0 and clas >= conf.clas) then
 			local effective = key == "feed" and conf.feed or conf.logclass
-			reply (nick, "TTHBlock " .. action .. ": configured " .. _tostring (settings [key]) ..
+			reply (nick, conf.bot .. " " .. action .. ": configured " .. _tostring (settings [key]) ..
 				", effective " .. _tostring (effective) ..
 				(key == "feed" and effective == 11 and " (muted)" or "") ..
 				(storage.settings and "." or "; settings storage unavailable."), 1)
 		else
-			reply (nick, "You do not have permission to view TTHBlock settings.", 1)
+			reply (nick, "You do not have permission to view " .. conf.bot .. " settings.", 1)
 		end
 		return 0
 	end
 
 	if action == "logs" then
 		if not canreadlogs (clas) then
-			reply (nick, "You do not have permission to read TTHBlock logs.", 1)
+			reply (nick, "You do not have permission to read " .. conf.bot .. " logs.", 1)
 			return 0
 		end
 		local count = value == "" and defaults.log_default_count or
@@ -754,7 +800,7 @@ function VH_OnHubCommand (nick, data, op, pm)
 	end
 
 	if clas ~= MASTER_CLASS and (clas < 0 or clas < conf.clas) then
-		reply (nick, "You do not have permission to use this TTHBlock command.", 1)
+		reply (nick, "You do not have permission to use this " .. conf.bot .. " command.", 1)
 		return 0
 	end
 	if action ~= "" then
@@ -785,23 +831,16 @@ function VH_OnHubCommand (nick, data, op, pm)
 		line = " Nothing yet.\r\n"
 	end
 
-	line = "TTH block statistics:\r\n\r\n" .. line
-
-	if tonumber (pm) == 1 then
-		VH:SendToUser ("$To: " .. nick .. " From: " .. VH.HubSec ..
-			" $<" .. VH.HubSec .. "> " .. line .. "|", nick)
-	else
-		VH:SendToUser ("<" .. VH.HubSec .. "> " .. line .. "|", nick)
-	end
+	line = conf.bot .. " statistics:\r\n\r\n" .. line
+	reply (nick, line, pm)
 	return 0
 end
 function getlist ()
 	local _, path = VH:GetVHCfgDir ()
 	path = path .. "/" .. conf.comm .. ".tth"
 	os.execute ("curl --get --location --max-redirs 1 --retry 2 --connect-timeout 5 " ..
-		"--max-time 10 --user-agent \"Mozilla/5.0 (compatible; TTH Block/0.0.3.7; " ..
-		"+https://ledo.feardc.net/other/)\" --silent --output \"" .. path ..
-		"\" \"" .. conf.list .. "\"")
+		"--max-time 10 --user-agent " .. shellquote (conf.user_agent) ..
+		" --silent --output " .. shellquote (path) .. " -- " .. shellquote (conf.list))
 	local file = io.open (path, "r")
 
 	if file then

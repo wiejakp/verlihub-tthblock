@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Check the index itself so an ignored file cannot bypass protection with git add -f.
+task_repo_root="$(git rev-parse --show-toplevel)"
+cd "$task_repo_root"
+python3 scripts/ai/secret_scan.py --staged
